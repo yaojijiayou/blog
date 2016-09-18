@@ -2,13 +2,6 @@
 
 ## 背景:
 
-最近用react+react router开发微信网页，在某个页面需要上传图片，遂使用了微信的[js api](https://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html)。在通过config接口注入权限验证配置环节，死活会报"invalid signature"的错误(但是我做了试验，确定每次获取的签名没有错。)奇怪的事情是:如果刷新该页面，却又能配置成功。
+前几日，部门小伙伴问我为什么淘宝移动端的首页要把样式都写到dom里，如下图所示：
 
-##解决方法:
-
-假设A跳到B，B页面需要微信权限配置，那么A跳转到B的跳转方式则不选用【browserHistory.push('/some/path')】或者【location.hash】的方式，而应该使用a标签或者location.href。
-
-##思考:
-
-导致这个问题的原因可能是（注意是:!!!可能是!!!,只有压缩的源代码，读不出什么名堂）:生成微信权限认证的signature等信息需要根据当前的url来生成，本地验证时前端生成的signature使用的url可能只会在页面onload等事件时获取，而使用【browserHistory.push('/some/path')】或者【location.hash】的方式，不存在这些事件，所以始终会出现"invalid signature"的问题
-当然这只是我的猜测，不过解决方法是可行的。
+![alt text](https://github.com/yaojijiayou/blog/blob/master/img/1.png?raw=true)

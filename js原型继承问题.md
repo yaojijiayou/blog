@@ -1,4 +1,4 @@
-# 通过原型继承时，为什么是：Child.prototype=new Parent()，而不是Child.prototype=Parent.prototype?
+# 通过原型继承时，为什么是:Child.prototype=new Parent()，而不是Child.prototype=Parent.prototype?
 
 ------
 

@@ -1,8 +1,12 @@
-# 通过原型继承时，为什么是:Child.prototype=new Parent()，而不是Child.prototype=Parent.prototype?
+# jQuery.extend——半吊子的深拷贝
 
 ------
 
-在js语言中，使用原型实现继承，一般我们的实现方法是：
+用过jQuery库的小伙伴应该都用过/听过jQuery提供的extend接口，其主要功能是:将两个或更多对象的内容合并到第一个对象。
+
+详细接口文档可见：
++ [extend api](http://api.jquery.com/?s=extend)
+
 
 ```
 //父类

@@ -55,7 +55,7 @@ if ( parts.length > 1 && origPOS.exec( selector ) ) {
 		//否则，则递归调用Sizzle函数，把parts数组第一个元素作为Sizzle函数的selector参数传入
 		//此时，这个参数是一个块表达式，形如:"div"或"div.className"或".className"等，只要不是关系符就行了
 
-		//我的疑问是:为什么要根据第一个元素是否是块关系符而分情况呢？
+		<font color=#0099ff size=12 face="黑体">//我的疑问是:为什么要根据第一个元素是否是块关系符而分情况呢？</font>
 		//为什么当第一个元素是块表达式时，需要立即直接执行Sizzle( parts.shift(), context )，
 		//为什么：对parts首对象（为块表达式时）的处理，不放在while循环中的posProcess中呢？
 		//这样的话这一行代码只需要set = context，这样代码看起来不更简单吗？

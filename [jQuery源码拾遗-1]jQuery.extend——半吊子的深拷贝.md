@@ -1,4 +1,4 @@
-# jQuery.extend——半吊子的深拷贝
+# [jQuery源码拾遗-1]jQuery.extend——半吊子的深拷贝
 
 ------
 

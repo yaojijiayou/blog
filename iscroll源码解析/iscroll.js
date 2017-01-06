@@ -25,7 +25,7 @@ var rAF = window.requestAnimationFrame	||
 	function (callback) { window.setTimeout(callback, 1000 / 60); };
 //最后一行代码的意思是:如果不支持requestAnimationFrame,那就用setTimeout来替代
 //为什么后面的间隔时间是1000/60毫秒呢？
-//因为相当一部分的浏览器的显示频率是16.7ms（16.7ms = 1000ms / 60, 即每秒60帧）
+//因为相当一部分的浏览器的显示频率是16.7ms（16.7 = 1000 / 60, 即每秒60帧）
 
 var utils = (function () {
 	var me = {};

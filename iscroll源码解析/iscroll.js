@@ -27,15 +27,37 @@ var rAF = window.requestAnimationFrame	||
 //为什么后面的间隔时间是1000/60毫秒呢？
 //因为相当一部分的浏览器的显示频率是16.7ms（16.7 = 1000 / 60, 即每秒60帧）
 
+
+//工具类
 var utils = (function () {
+
+	//me是最终返回的结果对象，
+	//将允许外部调用的工具函数以静态函数的形式，如：
+	//me.func = function(){...}
+	//绑在me对象上
 	var me = {};
 
+	//私有变量
+	//_elementStyle这个变量在老的版本里叫dummyStyle，我觉得老的名字更形象
+	//这就是一个空的，虚的style对象，里面包含了fontSize，background等css属性，但是对应的值都是"",
+	//具体包含哪些属性，可以自己在控制台打印document.createElement('div').style的内容
 	var _elementStyle = document.createElement('div').style;
+
+	//获取浏览器厂商，
 	var _vendor = (function () {
 		var vendors = ['t', 'webkitT', 'MozT', 'msT', 'OT'],
 			transform,
 			i = 0,
 			l = vendors.length;
+
+		/*
+			获取浏览器厂商名称的方式还是挺有意思的。
+			在_elementStyle中有个transform属性，根据浏览器不同，会有不同的前缀
+			比如，webkit内核的，就叫webkitTransform,
+			获取浏览器厂商名的具体逻辑就是，先给vendors数组元素后面拼上'ransform'，
+			然后检查拼接后的字符串在_elementStyle的属性中是否存在，
+			如果存在，则把原字符串的最后一个字符剔除后返回，即为浏览器厂商名
+		*/
 
 		for ( ; i < l; i++ ) {
 			transform = vendors[i] + 'ransform';
@@ -45,34 +67,46 @@ var utils = (function () {
 		return false;
 	})();
 
+	//给css属性加浏览器厂商前缀
 	function _prefixStyle (style) {
 		if ( _vendor === false ) return false;
+		//如果厂商名获取失败，则返回false
+
 		if ( _vendor === '' ) return style;
+		//如果厂商名是''，那么直接返回原来的style
+
+		//否则，则把浏览器厂商名拼在前面，把原属性名的第一个字符变大写，和剩余部分拼接
 		return _vendor + style.charAt(0).toUpperCase() + style.substr(1);
 	}
 
+	//获取当前时间
 	me.getTime = Date.now || function getTime () { return new Date().getTime(); };
 
+	//将obj上的属性覆盖或者新增到target对象
 	me.extend = function (target, obj) {
 		for ( var i in obj ) {
 			target[i] = obj[i];
 		}
 	};
 
+	//给el添加type事件的回调函数fn，并指明在捕获阶段(true)还是冒泡阶段(false)
 	me.addEvent = function (el, type, fn, capture) {
 		el.addEventListener(type, fn, !!capture);
 	};
 
+	//解绑事件
 	me.removeEvent = function (el, type, fn, capture) {
 		el.removeEventListener(type, fn, !!capture);
 	};
 
+	//给pointerEvent加前缀
 	me.prefixPointerEvent = function (pointerEvent) {
 		return window.MSPointerEvent ?
 			'MSPointer' + pointerEvent.charAt(7).toUpperCase() + pointerEvent.substr(8):
 			pointerEvent;
 	};
 
+	//T-UNKNOWN
 	me.momentum = function (current, start, time, lowerMargin, wrapperSize, deceleration) {
 		var distance = current - start,
 			speed = Math.abs(distance) / time,
@@ -102,6 +136,7 @@ var utils = (function () {
 
 	var _transform = _prefixStyle('transform');
 
+	//给工具函数对象增加下列标记属性
 	me.extend(me, {
 		hasTransform: _transform !== false,
 		hasPerspective: _prefixStyle('perspective') in _elementStyle,
@@ -124,6 +159,8 @@ var utils = (function () {
    - galaxy S6 is OK
      `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Mobile Safari/537.36 (Chrome/)`
   */
+
+  	//找到所有版本在build 535.19以下的安卓版本
 	me.isBadAndroid = (function() {
 		var appVersion = window.navigator.appVersion;
 		// Android browser is not a chrome browser.
@@ -139,6 +176,7 @@ var utils = (function () {
 		}
 	})();
 
+	//给工具函数的静态属性style增加下列属性
 	me.extend(me.style = {}, {
 		transform: _transform,
 		transitionTimingFunction: _prefixStyle('transitionTimingFunction'),
@@ -148,11 +186,13 @@ var utils = (function () {
 		touchAction: _prefixStyle('touchAction')
 	});
 
+	//判断元素e是否包含类名c
 	me.hasClass = function (e, c) {
 		var re = new RegExp("(^|\\s)" + c + "(\\s|$)");
 		return re.test(e.className);
 	};
 
+	//给元素e新增类名c
 	me.addClass = function (e, c) {
 		if ( me.hasClass(e, c) ) {
 			return;
@@ -163,6 +203,7 @@ var utils = (function () {
 		e.className = newclass.join(' ');
 	};
 
+	//给元素e去除类名c
 	me.removeClass = function (e, c) {
 		if ( !me.hasClass(e, c) ) {
 			return;
@@ -172,16 +213,19 @@ var utils = (function () {
 		e.className = e.className.replace(re, ' ');
 	};
 
+	//获取元素距离文档顶部和最左部的距离
+	//相对整个文档的起点，不是父元素，也不是相对position定义为relative的祖先元素
 	me.offset = function (el) {
+		//T-UNKNOWN，为什么要负值？
 		var left = -el.offsetLeft,
 			top = -el.offsetTop;
+		//这仅仅是相对父元素的距离
 
-		// jshint -W084
+		//通过递归父元素，把每一层的边距加起来，获取最终的距离值
 		while (el = el.offsetParent) {
 			left -= el.offsetLeft;
 			top -= el.offsetTop;
 		}
-		// jshint +W084
 
 		return {
 			left: left,
@@ -189,6 +233,7 @@ var utils = (function () {
 		};
 	};
 
+	//T-UNKNOWN
 	me.preventDefaultException = function (el, exceptions) {
 		for ( var i in exceptions ) {
 			if ( exceptions[i].test(el[i]) ) {
@@ -199,6 +244,7 @@ var utils = (function () {
 		return false;
 	};
 
+	//给工具类的eventType属性赋值
 	me.extend(me.eventType = {}, {
 		touchstart: 1,
 		touchmove: 1,

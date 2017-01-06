@@ -1,11 +1,31 @@
 /*! iScroll v5.2.0-snapshot ~ (c) 2008-2017 Matteo Spinelli ~ http://cubiq.org/license */
 (function (window, document, Math) {
+//以外部入参的形式获取window，document，Math对象，
+//这样可以缩短访问这些变量的时间，因为访问的作用域链路径变短了
+
+
+/*
+自定义rAF方法
+首先需要大致介绍一下requestAnimationFrame函数是用来干嘛的。
+前端技术发展到今天，有很多方式可以被用来做动画，
+比如：animattion+keyframes、transition、canvas等等
+但是有一种最傻最原始的方式，就是利用window.setTimout()或者window.setInterval()，
+通过在每一个小时间点上变换一下造型，加上人眼球的视觉暂留印象，使得一连串连贯的动作，看起来像是一段动画
+但是直接用setTimeout，显然不够优雅。
+由此就诞生了requestAnimationFrame，它相对setTimeout有了一些性能调优。
+具体用法是这样的：requestAnimationFrame(callback)//callback为回调函数
+以上只是一个粗略的介绍，具体可以看一下张鑫旭的文章：
+http://www.zhangxinxu.com/wordpress/2013/09/css3-animation-requestanimationframe-tween-%E5%8A%A8%E7%94%BB%E7%AE%97%E6%B3%95/
+*/
 var rAF = window.requestAnimationFrame	||
 	window.webkitRequestAnimationFrame	||
 	window.mozRequestAnimationFrame		||
 	window.oRequestAnimationFrame		||
 	window.msRequestAnimationFrame		||
 	function (callback) { window.setTimeout(callback, 1000 / 60); };
+//最后一行代码的意思是:如果不支持requestAnimationFrame,那就用setTimeout来替代
+//为什么后面的间隔时间是1000/60毫秒呢？
+//因为相当一部分的浏览器的显示频率是16.7ms（16.7ms = 1000ms / 60, 即每秒60帧）
 
 var utils = (function () {
 	var me = {};
@@ -2159,11 +2179,16 @@ Indicator.prototype = {
 
 IScroll.utils = utils;
 
+
+//将IScroll对象导出
 if ( typeof module != 'undefined' && module.exports ) {
+	//检测是否运行于 CommonJS 中，比如 NodeJS，如果是，则将IScroll赋值给 module.exports
 	module.exports = IScroll;
 } else if ( typeof define == 'function' && define.amd ) {
+	//检测是否是运行在 AMD 环境之中（检测 define 函数是否有定义），如果是，就使用 define 来定义模块
         define( function () { return IScroll; } );
 } else {
+	//以上都不支持，则直接将IScroll对象绑在window对象上
 	window.IScroll = IScroll;
 }
 

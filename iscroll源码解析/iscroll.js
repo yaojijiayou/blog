@@ -31,7 +31,7 @@ var rAF = window.requestAnimationFrame	||
 //工具类
 var utils = (function () {
 
-	//me是最终返回的结果对象，
+	//me是工具类最终返回的对象，
 	//将允许外部调用的工具函数以静态函数的形式，如：
 	//me.func = function(){...}
 	//绑在me对象上
@@ -245,7 +245,9 @@ var utils = (function () {
 	};
 
 	//给工具类的eventType属性赋值
+	//
 	me.extend(me.eventType = {}, {
+
 		touchstart: 1,
 		touchmove: 1,
 		touchend: 1,
@@ -254,22 +256,30 @@ var utils = (function () {
 		mousemove: 2,
 		mouseup: 2,
 
+		//IE 10及以上，还有Edge支持
 		pointerdown: 3,
 		pointermove: 3,
 		pointerup: 3,
 
+		//我查了一下CANIUSE，似乎没有支持了。原先应该也是在IE10中支持
 		MSPointerDown: 3,
 		MSPointerMove: 3,
 		MSPointerUp: 3
 	});
 
+	//枚举所有ease效果类型，
+	//下面每一个key都代表一种ease效果类型，value是对应的实现方式
+	//ease指的是：慢速结束的过渡效果
+	//cubic-bezier是贝塞尔曲线，具体可以查看一下css3的transition-timing-function
 	me.extend(me.ease = {}, {
+		//二次方程
 		quadratic: {
 			style: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
 			fn: function (k) {
 				return k * ( 2 - k );
 			}
 		},
+		//环形的
 		circular: {
 			style: 'cubic-bezier(0.1, 0.57, 0.1, 1)',	// Not properly "circular" but this looks better, it should be (0.075, 0.82, 0.165, 1)
 			fn: function (k) {
@@ -283,6 +293,7 @@ var utils = (function () {
 				return ( k = k - 1 ) * k * ( ( b + 1 ) * k + b ) + 1;
 			}
 		},
+		//反弹
 		bounce: {
 			style: '',
 			fn: function (k) {
@@ -297,6 +308,7 @@ var utils = (function () {
 				}
 			}
 		},
+		//有弹力的
 		elastic: {
 			style: '',
 			fn: function (k) {
@@ -380,11 +392,17 @@ var utils = (function () {
 
 	return me;
 })();
-function IScroll (el, options) {
-	this.wrapper = typeof el == 'string' ? document.querySelector(el) : el;
-	this.scroller = this.wrapper.children[0];
-	this.scrollerStyle = this.scroller.style;		// cache style for better performance
 
+//iScroll的构造函数
+function IScroll (el, options) {
+	//根据el，创建wrapper对象
+	this.wrapper = typeof el == 'string' ? document.querySelector(el) : el;
+	//把wrapper的第一个子元素设为scroller对象
+	this.scroller = this.wrapper.children[0];
+	// cache style for better performance
+	this.scrollerStyle = this.scroller.style;		
+
+	//默认配置参数值
 	this.options = {
 
 		resizeScrollbars: true,
@@ -410,17 +428,26 @@ function IScroll (el, options) {
 		preventDefault: true,
 		preventDefaultException: { tagName: /^(INPUT|TEXTAREA|BUTTON|SELECT)$/ },
 
+		//是否开启硬件加速
+		/*
+		啥是硬件加速？
+		请看文章:http://www.cnblogs.com/PeunZhang/p/3510083.html
+		*/
 		HWCompositing: true,
 		useTransition: true,
 		useTransform: true,
+
+		//是否绑定到wrapper对象上？
+		//如果window对象的onmousedown属性为undefined，则为true
 		bindToWrapper: typeof window.onmousedown === "undefined"
 	};
 
+	//使用外部传入的配置参数，替换默认参数
 	for ( var i in options ) {
 		this.options[i] = options[i];
 	}
 
-	// Normalize options
+	//如果开启硬件加速，且支持css3的perspective属性
 	this.translateZ = this.options.HWCompositing && utils.hasPerspective ? ' translateZ(0)' : '';
 
 	this.options.useTransition = utils.hasTransition && this.options.useTransition;
@@ -480,8 +507,10 @@ IScroll.prototype = {
 	version: '5.2.0-snapshot',
 
 	_init: function () {
+		//初始化事件的回调
 		this._initEvents();
 
+		//scrollbar是指整个滚动条，indicator指的是滚动滑块
 		if ( this.options.scrollbars || this.options.indicators ) {
 			this._initIndicators();
 		}
@@ -1045,9 +1074,24 @@ IScroll.prototype = {
 
 	},
 
+
+	//初始化事件，参数为true表示解绑事件，false为绑定事件
 	_initEvents: function (remove) {
+		//根据remove入参决定是绑定事件还是解绑事件
 		var eventType = remove ? utils.removeEvent : utils.addEvent,
+		//根据配置参数中bindToWrapper决定target对象
 			target = this.options.bindToWrapper ? this.wrapper : window;
+
+		//以下是在不同对象上绑定相关事件
+		//注意:下面绑定的listener（即eventType函数的第三个入参），都是this，this就是IScroll对象的实例
+		//在以往的了解中target.addEventListener(type, listener[, useCapture])中的
+		//listener往往是一个函数，当事件触发时即执行该函数
+		//实际上，listener也可以是一个实现了 EventListener 接口的对象
+		//还记得IScroll的原型中定义了handleEvent函数吗？
+		//这就使得IScroll是实现了 EventListener 接口的对象
+		//当事件触发的时候，就会跑进IScroll对象实例的handleEvent函数
+
+		//WHY target更倾向于window？
 
 		eventType(window, 'orientationchange', this);
 		eventType(window, 'resize', this);
@@ -1099,9 +1143,15 @@ IScroll.prototype = {
 		return { x: x, y: y };
 	},
 	_initIndicators: function () {
+		//scrollbar变得可拖拽
 		var interactive = this.options.interactiveScrollbars,
+		/*
+		scrollbars的可选属性是true/false/'custom',
+		当为true/false的时候customStyle为true
+		当为'custom'时为false
+		*/
 			customStyle = typeof this.options.scrollbars != 'string',
-			indicators = [],
+			indicators = [],//临时存放indicator的数组
 			indicator;
 
 		var that = this;
@@ -1109,24 +1159,29 @@ IScroll.prototype = {
 		this.indicators = [];
 
 		if ( this.options.scrollbars ) {
-			// Vertical scrollbar
+			//允许纵向滚动
 			if ( this.options.scrollY ) {
 				indicator = {
 					el: createDefaultScrollbar('v', interactive, this.options.scrollbars),
 					interactive: interactive,
 					defaultScrollbars: true,
 					customStyle: customStyle,
+
+					//scrollbar尺寸是否是动态可变的
 					resize: this.options.resizeScrollbars,
+					//当scrollbar滚出界限的时候，尺寸是否会收缩，且如何收缩
 					shrink: this.options.shrinkScrollbars,
+					//当不被使用时，是否隐藏scrollbar
 					fade: this.options.fadeScrollbars,
 					listenX: false
 				};
 
 				this.wrapper.appendChild(indicator.el);
+				//往数组中加入indicator
 				indicators.push(indicator);
 			}
 
-			// Horizontal scrollbar
+			//允许横向滚动时
 			if ( this.options.scrollX ) {
 				indicator = {
 					el: createDefaultScrollbar('h', interactive, this.options.scrollbars),
@@ -1145,15 +1200,17 @@ IScroll.prototype = {
 		}
 
 		if ( this.options.indicators ) {
-			// TODO: check concat compatibility
+			//如果配置中也有indicators属性，那么把它们也加入到
 			indicators = indicators.concat(this.options.indicators);
 		}
 
+		//遍历临时的indicators数组，利用indicator来构建Indicator对象实例，并把它们存放到
+		//Iscroll实例的indicators数组中
 		for ( var i = indicators.length; i--; ) {
 			this.indicators.push( new Indicator(this, indicators[i]) );
 		}
 
-		// TODO: check if we can use array.map (wide compatibility and performance issues)
+		//使全部Indicator对象实例，执行同一个函数fn
 		function _indicatorsMap (fn) {
 			if (that.indicators) {
 				for ( var i = that.indicators.length; i--; ) {
@@ -1162,7 +1219,10 @@ IScroll.prototype = {
 			}
 		}
 
+		//如果fadeScrollbars(不使用时消失)设为true
 		if ( this.options.fadeScrollbars ) {
+			//当Iscroll实例接收到下列事件发生时，则消失
+
 			this.on('scrollEnd', function () {
 				_indicatorsMap(function () {
 					this.fade();
@@ -1190,16 +1250,19 @@ IScroll.prototype = {
 
 
 		this.on('refresh', function () {
+			//当Iscroll实例接收refresh事件时，则调用Indicator实例的refresh方法
 			_indicatorsMap(function () {
 				this.refresh();
 			});
 		});
 
 		this.on('destroy', function () {
+			//当Iscroll实例接收destroy事件时，则调用Indicator实例的destroy方法
 			_indicatorsMap(function () {
 				this.destroy();
 			});
 
+			//并把Iscroll实例中的indicators数组也销毁
 			delete this.indicators;
 		});
 	},
@@ -1773,24 +1836,40 @@ IScroll.prototype = {
 		}
 	}
 };
+
+/*
+创建一个默认的scrollbar
+@param direction，'h'(水平)/'v'(纵向)
+@param interactive，是否可交互
+@type 是配置参数中的scrollbar
+*/
 function createDefaultScrollbar (direction, interactive, type) {
+	//所谓的滚动条和滚动滑块都是div
 	var scrollbar = document.createElement('div'),
 		indicator = document.createElement('div');
 
+	//type，也即配置参数中的scrollbar，可选的值为true,false,'custom'
+	//只有当为true时需要程序来定义默认的样式
+	//为custom时，由用户来编辑iScrollHorizontalScrollbar、iScrollVerticalScrollbar、iScrollIndicator来实现自己需要的样式
+	//为false的时候，就别操这份心了
 	if ( type === true ) {
 		scrollbar.style.cssText = 'position:absolute;z-index:9999';
 		indicator.style.cssText = '-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;position:absolute;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.9);border-radius:3px';
 	}
 
+	//给滑块div的类名设为IScrollIndicator
 	indicator.className = 'iScrollIndicator';
 
 	if ( direction == 'h' ) {
+		//水平滚动
 		if ( type === true ) {
 			scrollbar.style.cssText += ';height:7px;left:2px;right:2px;bottom:0';
 			indicator.style.height = '100%';
 		}
+		//根据水平或垂直滚动的设置，来设定对应的滚动条div的类名
 		scrollbar.className = 'iScrollHorizontalScrollbar';
 	} else {
+		//垂直滚动
 		if ( type === true ) {
 			scrollbar.style.cssText += ';width:7px;bottom:2px;top:2px;right:1px';
 			indicator.style.width = '100%';
@@ -1798,36 +1877,56 @@ function createDefaultScrollbar (direction, interactive, type) {
 		scrollbar.className = 'iScrollVerticalScrollbar';
 	}
 
+	//设置滚动条的overflow为hidden
 	scrollbar.style.cssText += ';overflow:hidden';
 
+	//WHY
 	if ( !interactive ) {
 		scrollbar.style.pointerEvents = 'none';
 	}
 
+	//滚动条里放滚动滑块
 	scrollbar.appendChild(indicator);
 
+	//把整个滚动条div返回
 	return scrollbar;
 }
 
+
+/*
+Indicator的构造函数
+@param scroller iScroll对象实例
+@param options  在_initIndicators中构造的属性配置对象
+*/
 function Indicator (scroller, options) {
+	//wrapper是createDefaultScrollbar中的scrollbar，即滚动条
 	this.wrapper = typeof options.el == 'string' ? document.querySelector(options.el) : options.el;
 	this.wrapperStyle = this.wrapper.style;
+	//indicator是createDefaultScrollbar中的indicator，即滚动滑块
 	this.indicator = this.wrapper.children[0];
 	this.indicatorStyle = this.indicator.style;
+	//iScroll对象实例
 	this.scroller = scroller;
 
 	this.options = {
+		//To which axis the indicator listens to. It can be just one or both.
 		listenX: true,
 		listenY: true,
+
+		//下面五个属性在_initIndicators函数中已有解释
 		interactive: false,
 		resize: true,
 		defaultScrollbars: false,
 		shrink: false,
 		fade: false,
+
+		//The speed the indicator moves in relation to the main scroller size. 
+		//By default this is set automatically. You rarely need to alter this value.
 		speedRatioX: 0,
 		speedRatioY: 0
 	};
 
+	//用外部传入的options属性，替换this.options中的属性
 	for ( var i in options ) {
 		this.options[i] = options[i];
 	}
@@ -1837,16 +1936,20 @@ function Indicator (scroller, options) {
 	this.maxPosX = 0;
 	this.maxPosY = 0;
 
+	//滑块若可交互
 	if ( this.options.interactive ) {
 		if ( !this.options.disableTouch ) {
+			//如果支持触摸,则绑定相关事件
 			utils.addEvent(this.indicator, 'touchstart', this);
 			utils.addEvent(window, 'touchend', this);
 		}
 		if ( !this.options.disablePointer ) {
+			//如果支持Pointer，则...
 			utils.addEvent(this.indicator, utils.prefixPointerEvent('pointerdown'), this);
 			utils.addEvent(window, utils.prefixPointerEvent('pointerup'), this);
 		}
 		if ( !this.options.disableMouse ) {
+			//如果支持鼠标，则...
 			utils.addEvent(this.indicator, 'mousedown', this);
 			utils.addEvent(window, 'mouseup', this);
 		}
@@ -2223,6 +2326,7 @@ Indicator.prototype = {
 	}
 };
 
+//把工具对象作为IScroll对象的静态属性
 IScroll.utils = utils;
 
 

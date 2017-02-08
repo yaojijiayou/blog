@@ -447,7 +447,7 @@ function IScroll (el, options) {
 		this.options[i] = options[i];
 	}
 
-	//如果开启硬件加速，且支持css3的perspective属性
+	//如果开启硬件加速，且支持css3的perspective属性,
 	this.translateZ = this.options.HWCompositing && utils.hasPerspective ? ' translateZ(0)' : '';
 
 	this.options.useTransition = utils.hasTransition && this.options.useTransition;
@@ -512,17 +512,28 @@ IScroll.prototype = {
 
 		//scrollbar是指整个滚动条，indicator指的是滚动滑块
 		if ( this.options.scrollbars || this.options.indicators ) {
+			//初始化整个滚动条和滚动滑块
 			this._initIndicators();
 		}
 
+		//是否监听鼠标滚轮
 		if ( this.options.mouseWheel ) {
+			//初始化鼠标滚轮相关事件
 			this._initWheel();
 		}
 
+		/*
+		snap,此处翻译为“分割器”比较好
+		程序根据传入的规则把整块滚动区域分成若干页，每次滚动的时候，会滑动一页
+		类似于轮播的效果。
+		如果snap为true，则表示根据容器的大小自动分页
+		如果snap为选择器路径，则表示根据该选择器路径匹配的元素来分页
+		*/
 		if ( this.options.snap ) {
 			this._initSnap();
 		}
 
+		//初始化快捷键设置
 		if ( this.options.keyBindings ) {
 			this._initKeys();
 		}
@@ -846,17 +857,22 @@ IScroll.prototype = {
 	},
 
 	refresh: function () {
-		utils.getRect(this.wrapper);		// Force reflow
+		//强制reflow(重新布局)，因为getRect函数中会读取wrapper的offsetxxx属性，所以会导致reflow
+		//reflow与repaint，以及如何优化可以参见：http://www.cnblogs.com/jiajiaobj/archive/2012/06/11/2545291.html
+		utils.getRect(this.wrapper);
 
+		//clientWidth:获取对象可见内容的宽度，不包括滚动条，不包括边框；
 		this.wrapperWidth	= this.wrapper.clientWidth;
 		this.wrapperHeight	= this.wrapper.clientHeight;
 
+		//获取scroller对象的边界
 		var rect = utils.getRect(this.scroller);
 /* REPLACE START: refresh */
 
 		this.scrollerWidth	= rect.width;
 		this.scrollerHeight	= rect.height;
 
+		//最大可滚动距离为
 		this.maxScrollX		= this.wrapperWidth - this.scrollerWidth;
 		this.maxScrollY		= this.wrapperHeight - this.scrollerHeight;
 
@@ -1268,10 +1284,13 @@ IScroll.prototype = {
 	},
 
 	_initWheel: function () {
+
 		utils.addEvent(this.wrapper, 'wheel', this);
 		utils.addEvent(this.wrapper, 'mousewheel', this);
+		//DOMMouseScroll用于支持火狐浏览器
 		utils.addEvent(this.wrapper, 'DOMMouseScroll', this);
 
+		//销毁时解绑事件
 		this.on('destroy', function () {
 			clearTimeout(this.wheelTimeout);
 			this.wheelTimeout = null;
@@ -1379,6 +1398,7 @@ IScroll.prototype = {
 	_initSnap: function () {
 		this.currentPage = {};
 
+		//如果snap为选择器路径，则表示根据该选择器路径匹配的元素来分页
 		if ( typeof this.options.snap == 'string' ) {
 			this.options.snap = this.scroller.querySelectorAll(this.options.snap);
 		}
@@ -1626,7 +1646,7 @@ IScroll.prototype = {
 	},
 
 	_initKeys: function (e) {
-		// default key bindings
+		//默认绑定的快捷键
 		var keys = {
 			pageUp: 33,
 			pageDown: 34,
@@ -1639,7 +1659,9 @@ IScroll.prototype = {
 		};
 		var i;
 
-		// if you give me characters I give you keycode
+		//根据字符串的首字母，来确定keycode
+		//charCodeAt() 方法可返回指定位置的字符的 Unicode 编码，
+		//恰好keycode和大写字母对应的Unicode编码是一致的
 		if ( typeof this.options.keyBindings == 'object' ) {
 			for ( i in this.options.keyBindings ) {
 				if ( typeof this.options.keyBindings[i] == 'string' ) {
@@ -1650,12 +1672,15 @@ IScroll.prototype = {
 			this.options.keyBindings = {};
 		}
 
+		//把默认的按键设置和外部传入设置合并一下
 		for ( i in keys ) {
 			this.options.keyBindings[i] = this.options.keyBindings[i] || keys[i];
 		}
 
+		//绑定keydown事件
 		utils.addEvent(window, 'keydown', this);
 
+		//销毁时解绑
 		this.on('destroy', function () {
 			utils.removeEvent(window, 'keydown', this);
 		});

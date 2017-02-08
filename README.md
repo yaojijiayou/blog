@@ -8,3 +8,5 @@
 
 + [[jQuery源码拾遗-1]jQuery.extend——半吊子的深拷贝](https://github.com/yaojijiayou/blog/blob/master/%5BjQuery%E6%BA%90%E7%A0%81%E6%8B%BE%E9%81%97-1%5DjQuery.extend%E2%80%94%E2%80%94%E5%8D%8A%E5%90%8A%E5%AD%90%E7%9A%84%E6%B7%B1%E6%8B%B7%E8%B4%9D.md)
 
++ [[jQuery源码拾遗-2]对Sizzle中一行代码的纠结](https://github.com/yaojijiayou/blog/blob/master/%5BjQuery%E6%BA%90%E7%A0%81%E6%8B%BE%E9%81%97-2%5D%E5%AF%B9Sizzle%E4%B8%AD%E4%B8%80%E8%A1%8C%E4%BB%A3%E7%A0%81%E7%9A%84%E7%BA%A0%E7%BB%93.md)
+

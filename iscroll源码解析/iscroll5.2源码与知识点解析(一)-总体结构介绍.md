@@ -74,13 +74,19 @@ IScroll的代码结构很简单:
 
 ## 术语解释
 
-具体请看下面的示意图，
+具体请看下面的示意图:
 
+![术语示意图](https://github.com/yaojijiayou/blog/blob/master/img/glossary.png)
 
-wrapper是外部的容器，其高度、位置正常情况下是固定的。可以把它理解为一个窗口，窗口保持不动，但是映入窗户的内容在动
+wrapper是外部的容器，其高度、位置正常情况下是固定的。可以把它理解为一个窗口，窗口保持不动，但是映入窗户的内容在动。
+
 scroller是实际“滚动”的对象，当滚动的时候，实际上是scroller的位置在调整。
+
 如下图所示:
 
+![scroller示意图](https://github.com/yaojijiayou/blog/blob/master/img/scroller.png)
+
+所以，**IScroll库的核心内容就是:如何让scroller部分能不断随着用户的动作来变换位置，从而实现滚动的效果。**
 
 indicator就是滑块，可以体现目前显示的内容，在整个对象中大概所处的位置
 

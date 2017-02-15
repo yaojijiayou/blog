@@ -122,7 +122,7 @@ function loaded() {
 
 wrapper的第一个子元素是scroller，上方代码中的ul标签就是wrapper
 
-## 总结
+## 本篇总结
 
 敬请关注下一篇！
 

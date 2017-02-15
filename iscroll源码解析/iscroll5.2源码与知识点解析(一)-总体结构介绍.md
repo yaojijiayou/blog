@@ -78,9 +78,9 @@ IScroll的代码结构很简单:
 
 ![术语示意图](https://github.com/yaojijiayou/blog/blob/master/img/glossary.png)
 
-####  1.wrapper是外部的容器，其高度、位置正常情况下是固定的。可以把它理解为一个窗口，窗口保持不动，但是映入窗户的内容在动；
+#####  1.wrapper是外部的容器，其高度、位置正常情况下是固定的。可以把它理解为一个窗口，窗口保持不动，但是映入窗户的内容在动；
 
-####  2.scroller是实际“滚动”的对象，当滚动的时候，实际上是scroller的位置在调整；
+#####  2.scroller是实际“滚动”的对象，当滚动的时候，实际上是scroller的位置在调整；
 
 如下图所示:
 
@@ -88,11 +88,11 @@ IScroll的代码结构很简单:
 
 所以，**IScroll库的核心内容就是:如何让scroller部分能不断随着用户的动作来变换位置，从而实现滚动的效果。**；
 
-####  3.indicator就是滑块，可以体现目前显示的内容，在整个对象中大概所处的位置；
+#####  3.indicator代表滑块，可以体现目前显示的内容，在整个对象中大概所处的位置；
 
-####  4.scrollbar就是滚动槽。
+#####  4.scrollbar代表滚动槽。
 
-####  5.官网上提供的：最简IScroll初始化代码
+#####  5.官网上提供的：最简IScroll初始化代码
 
 ```
 <head>
@@ -119,7 +119,8 @@ function loaded() {
 ```
 
 其中id为wrapper的div就是wrapper
-wrapper的第一个子元素就是scroller，上方代码中的ul标签就是wrapper
+
+wrapper的第一个子元素是scroller，上方代码中的ul标签就是wrapper
 
 ## 总结
 

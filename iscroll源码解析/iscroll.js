@@ -106,7 +106,7 @@ var utils = (function () {
 			pointerEvent;
 	};
 
-	//T-UNKNOWN
+	//根据我们的拖动返回运动的长度与耗时，用于惯性拖动判断
 	me.momentum = function (current, start, time, lowerMargin, wrapperSize, deceleration) {
 		var distance = current - start,
 			speed = Math.abs(distance) / time,
@@ -373,6 +373,7 @@ var utils = (function () {
 
 	me.getRect = function(el) {
 		if (el instanceof SVGElement) {
+			//getBoundingClientRect是DOM元素到浏览器可视范围的距离（不包含文档卷起的部分）
 			var rect = el.getBoundingClientRect();
 			return {
 				top : rect.top,
@@ -419,6 +420,7 @@ function IScroll (el, options) {
 		startY: 0,
 		scrollY: true,
 		directionLockThreshold: 5,
+		//是否有惯性缓冲动画
 		momentum: true,
 
 		bounce: true,
@@ -430,7 +432,7 @@ function IScroll (el, options) {
 
 		//是否开启硬件加速
 		/*
-		啥是硬件加速？
+		什么是硬件加速？
 		请看文章:http://www.cnblogs.com/PeunZhang/p/3510083.html
 		*/
 		HWCompositing: true,
@@ -561,6 +563,14 @@ IScroll.prototype = {
 		}
 	},
 
+	/*
+	事件:
+	'touchstart',
+	'pointerdown',
+	'MSPointerDown',
+	'mousedown'
+	触发时的回调函数
+	*/
 	_start: function (e) {
 		// React to left mouse button only
 		if ( utils.eventType[e.type] != 1 ) {
@@ -961,13 +971,22 @@ IScroll.prototype = {
 	},
 
 	scrollTo: function (x, y, time, easing) {
+		//设置ease效果
 		easing = easing || utils.ease.circular;
 
+		//是否使用transition中，如果持续时间为零，那么直接瞬移，所以也不会再过渡中
 		this.isInTransition = this.options.useTransition && time > 0;
+
+		//这里的transitionType就是我们的动画的贝塞尔曲线  
 		var transitionType = this.options.useTransition && easing.style;
+
+		//如果时间为0，或者transitionType不为空
 		if ( !time || transitionType ) {
 				if(transitionType) {
+					//UNKNOWN
+					//为scroller元素添加transtion-timing-function函数  
 					this._transitionTimingFunction(easing.style);
+					//这是transition-duration属性 
 					this._transitionTime(time);
 				}
 			this._translate(x, y);
@@ -1060,25 +1079,27 @@ IScroll.prototype = {
 	},
 
 	_translate: function (x, y) {
+		//如果使用transform属性
 		if ( this.options.useTransform ) {
 
 /* REPLACE START: _translate */
-
+			//通过transform的translate来实现
 			this.scrollerStyle[utils.style.transform] = 'translate(' + x + 'px,' + y + 'px)' + this.translateZ;
 
 /* REPLACE END: _translate */
 
 		} else {
+			//否则使用left/top
 			x = Math.round(x);
 			y = Math.round(y);
 			this.scrollerStyle.left = x + 'px';
 			this.scrollerStyle.top = y + 'px';
 		}
-
+		//记录当前最新所处的位置
 		this.x = x;
 		this.y = y;
 
-
+	//如果需要显示滑块，相应调整滑块位置
 	if ( this.indicators ) {
 		for ( var i = this.indicators.length; i--; ) {
 			this.indicators[i].updatePosition();
@@ -1785,6 +1806,7 @@ IScroll.prototype = {
 				newX, newY,
 				easing;
 
+			//如果已经超时，那么直接用_translate瞬移到终点
 			if ( now >= destTime ) {
 				that.isAnimating = false;
 				that._translate(destX, destY);
@@ -1796,12 +1818,14 @@ IScroll.prototype = {
 				return;
 			}
 
+			//分段来滑动，
 			now = ( now - startTime ) / duration;
 			easing = easingFn(now);
 			newX = ( destX - startX ) * easing + startX;
 			newY = ( destY - startY ) * easing + startY;
 			that._translate(newX, newY);
 
+			//通过rAF来循环触发滑动
 			if ( that.isAnimating ) {
 				rAF(step);
 			}

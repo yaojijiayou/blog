@@ -165,9 +165,8 @@ function addEvent(elm, evType, fn, useCapture) {
 我对于addEventListener函数的用法，停留在addEventListener(type,handler,useCapture)上。type是事件类型，handler是事件触发后的处理函数，useCapture决定了是在冒泡阶段还是捕获阶段触发handler。
 
 但是读了iscroll的源码，让我学习到了一种新的addEventListener用法:
-> target.addEventListener(type, listener[, useCapture]);
-> listener
-当所监听的事件类型触发时，会接收到一个事件通知（实现了 Event 接口的对象）对象。listener 必须是一个实现了EventListener接口的对象，或者是一个函数
+> * target.addEventListener(type, listener[, useCapture]);
+> * listener 必须是一个实现了EventListener接口的对象，或者是一个函数
 
 源码中，传入的listener参数都是this，即iscroll对象，而iscroll的原型中有一个handleEvent函数，这就使得iscroll对象成了一个“实现了EventListener 接口的对象”，当EventListener 所注册的事件发生的时候，handleEvent方法会被调用。
 

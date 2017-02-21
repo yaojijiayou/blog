@@ -1,6 +1,6 @@
 # iScroll5.2源码与知识点解析(三)-事件系统之自定义事件
 
-接上一篇[iScroll5.2源码与知识点解析(二)-事件系统之浏览器标准事件](https://github.com/yaojijiayou/blog/blob/master/iscroll%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/iscroll5.2%E6%BA%90%E7%A0%81%E4%B8%8E%E7%9F%A5%E8%AF%86%E7%82%B9%E8%A7%A3%E6%9E%90(%E4%BA%8C)-%E4%BA%8B%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B9%8B%E6%B5%8F%E8%A7%88%E5%99%A8%E6%A0%87%E5%87%86%E4%BA%8B%E4%BB%B6.md)，本篇继续介绍iScroll的事件系统中的自定义事件部分。
+接上一篇[iScroll5.2源码与知识点解析(二)-事件系统之浏览器标准事件](https://github.com/yaojijiayou/blog/blob/master/iscroll%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/iscroll5.2%E6%BA%90%E7%A0%81%E4%B8%8E%E7%9F%A5%E8%AF%86%E7%82%B9%E8%A7%A3%E6%9E%90(%E4%BA%8C)-%E4%BA%8B%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B9%8B%E6%B5%8F%E8%A7%88%E5%99%A8%E6%A0%87%E5%87%86%E4%BA%8B%E4%BB%B6.md)，本篇继续介绍iScroll的事件系统中的**自定义事件部分**。
 
 iScroll自定义事件系统的实现很简单，但对于我们自行实现一套事件机制还是有一点借鉴意义的。主要涉及到的代码如下:
 

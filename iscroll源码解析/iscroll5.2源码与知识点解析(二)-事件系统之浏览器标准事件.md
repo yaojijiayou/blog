@@ -1,4 +1,4 @@
-# iScroll5.2源码与知识点解析(二)-事件系统之浏览器标准事件系统
+# iScroll5.2源码与知识点解析(二)-事件系统之浏览器标准事件
 
 在上一篇[iScroll5.2源码与知识点解析(一)-初探](https://github.com/yaojijiayou/blog/blob/master/iframe%E5%BC%95%E5%85%A5%E9%A1%B5%E9%9D%A2%E4%B8%8E%E4%B8%BB%E9%A1%B5%E9%9D%A2%E7%9A%84viewport%E8%AE%BE%E7%BD%AE%E5%86%B2%E7%AA%81%E9%97%AE%E9%A2%98%E6%8E%A2%E8%AE%A8.md)中，我大致介绍了一下iScroll的代码结构和术语，本篇将着重介绍一下iScroll的事件系统。iScroll的事件系统可以分为两部分:
 > * 浏览器标准事件系统

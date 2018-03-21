@@ -303,7 +303,7 @@ return Promise.resolve(fn(context, function next() {
         }))
 ```
 
-    此时fn就是第一个中间件，**它是一个async函数，async函数会返回一个Promise对象，Promise.resolve（）中若传入一个Promise对象的话，那么Promise.resolve将不做任何修改、原封不动地返回这个Promise对象**。
+此时fn就是第一个中间件，**它是一个async函数，async函数会返回一个Promise对象，Promise.resolve（）中若传入一个Promise对象的话，那么Promise.resolve将不做任何修改、原封不动地返回这个Promise对象**。
     进入到第一个中间件代码内部：
     先执行‘console.log("1-start");’；
     然后执行'await next();'并开始等待next执行返回；
@@ -317,7 +317,7 @@ return Promise.resolve(fn(context, function next() {
 if (i === middleware.length) fn = next
 if (!fn) return Promise.resolve()
 ```
-            所以返回Promise.resolve()，此时第二个中间件的next函数返回了。
+所以返回Promise.resolve()，此时第二个中间件的next函数返回了。
         所以接下来执行console.log("2-end");由此第二个中间件执行完成，把程序控制权传递给第一个中间件。
     第一个中间件执行console.log("1-end");。
     终于完成所有中间件的执行，若中间没有异常，则返回Promise.resolve()，执行handleResponse回调；若有异常，则返回Promise.reject(err),执行onerror回调。

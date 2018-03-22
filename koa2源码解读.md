@@ -408,7 +408,69 @@ function co(gen) {
 
 
 ### **3.3，统一的错误处理机制**
-[TODO]
+koa框架提供了一种集中式的错误处理机制，只需让koa实例监听error事件，则所有中间件代码逻辑的错误都可以在该回调函数中统一处理，如下
+```
+app.on('error', err => {
+  log.error('server error', err)
+});
+```
+这是如何做到的呢？
+核心代码如下：
+第一部分：application.js：
+```
+ handleRequest(ctx, fnMiddleware) {
+    const res = ctx.res;
+    res.statusCode = 404;
+    //1，虽然application.js中也存在onerror函数，但是这里用到的函数是context.js中定义的onerror
+    const onerror = err => ctx.onerror(err);
+    const handleResponse = () => respond(ctx);
+    onFinished(res, onerror);
+    //2，中间件中出错的话，都能执行onerror函数的关键：
+    return fnMiddleware(ctx).then(handleResponse).catch(onerror);
+}
+```
+看完会有两个疑问：
+1，出错执行的回调函数是context.js中的onerror函数，为什么在application实例上监听error事件，就能处理所有中间件中的错误呢？
+请看context.js中onerror函数的精简版：
+context.js：
+```
+onerror(err) {
+    this.app.emit('error', err, this);
+}
+```
+其中this.app即是对application的引用，当context.js的onerror触发时，会触发application实例的error事件。该事件机制是基于“Application类继承自EventEmitter”这一事实。
+
+2，如何做到集中处理所有中间件的错误？中间件洋葱式调用的实现逻辑如下：
+```
+function compose (middleware) {
+  return function (context, next) {
+    let index = -1
+    return dispatch(0)
+    function dispatch (i) {
+      if (i <= index) return Promise.reject(new Error('next() called multiple times'))
+      
+      index = i
+      let fn = middleware[i]
+      if (i === middleware.length) fn = next
+      if (!fn) return Promise.resolve()
+      try {
+        
+        return Promise.resolve(fn(context, function next () {
+          return dispatch(i + 1)
+        }))
+      } catch (err) {
+        return Promise.reject(err)
+      }
+    }
+  }
+}
+```
+主要涉及到下面几个知识点：
+> * 1，async函数返回一个 Promise 对象。
+> * 2，async函数内部抛出错误，会导致返回的 Promise对象变为reject状态。抛出的错误对象会被catch方法回调函数接收到。
+> * 3，await命令后面的 Promise 对象如果变为reject状态，则reject的参数会被catch方法的回调函数接收到。
+
+结合源码和上面三点，自己想一想就能想清楚了。
 
 ### **3.4，context如何实现对request和response的代理**
 [TODO]
